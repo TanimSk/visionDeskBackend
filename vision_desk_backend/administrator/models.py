@@ -24,7 +24,7 @@ class WorkPlaceMetadata(models.Model):
 class WorkDesk(models.Model):
     # Model for the work desk
     workplace = models.ForeignKey(WorkPlaceMetadata, on_delete=models.CASCADE, related_name="workdesk")
-    desk_number = models.CharField(max_length=100)
+    desk_number = models.CharField(max_length=100, unique=True)
     x1_coordinate = models.IntegerField()
     y1_coordinate = models.IntegerField()
     x2_coordinate = models.IntegerField()
@@ -48,7 +48,7 @@ class DeskStatusEnum(Enum):
 
 class WorkDeskStatus(models.Model):
     # Model for the work desk status
-    workdesk = models.ForeignKey(WorkDesk, on_delete=models.CASCADE)
+    workdesk = models.ForeignKey(WorkDesk, on_delete=models.CASCADE, related_name="workdesk")
     status = models.CharField(
         max_length=10,
         choices=DeskStatusEnum.choices(),
@@ -58,4 +58,4 @@ class WorkDeskStatus(models.Model):
     updated_at = models.DateTimeField()
 
     def __str__(self):
-        return f"{self.workdesk.desk_number} - {'Occupied' if self.is_occupied else 'Available'}"
+        return f"{self.workdesk.desk_number}"

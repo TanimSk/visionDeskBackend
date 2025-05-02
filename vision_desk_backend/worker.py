@@ -9,6 +9,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "vision_desk_backend.settings")
 django.setup()
 
 from administrator.buffer import StatusBuffer
+
 status_buffer = StatusBuffer()
 
 # Connect to Redis
@@ -18,15 +19,15 @@ cap = cv2.VideoCapture("http://127.0.0.1:8001/video")
 
 
 import random
+
+
 def process_frame(frame):
-    
+
     # Dummy ML processing (convert to grayscale as an example)
     return {
         "frame": cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY),
-        # "frame": frame,
-        "desk_no": 1,
-        # "status_enum": random.choice([0, 1, 2]),  # Random status for demonstration
-        "status_enum": 1
+        "desk_no": "01",
+        "status_enum": 0,  # Random status for demonstration
     }
 
 

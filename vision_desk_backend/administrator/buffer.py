@@ -1,25 +1,32 @@
 from django.utils import timezone
-from administrator.models import WorkDeskStatus, DeskStatusEnum
+from administrator.models import WorkDeskStatus, DeskStatusEnum, WorkDesk
+from django.utils import timezone
 
 
 class StatusBuffer:
-    BUFFER_SIZE = 100
+    FRAMES_LIMIT = 1000
 
     def __init__(self):
         self.buffer = []
+        self.frame_count = 0
+        self.all_desk_instances_map = {
+            desk.desk_number: desk for desk in WorkDesk.objects.all()
+        }
 
     def add_status(self, desk_no, status_enum):
+        self.frame_count += 1
         """
         adds status to the buffer along with the timestamp and desk number.
         if the buffer exceeds the BUFFER_SIZE, it stores the buffer in the database in batches.
         And then clears the buffer.
         """
-        if len(self.buffer) >= self.BUFFER_SIZE:
+        if self.frame_count >= self.FRAMES_LIMIT:
             print("Buffer size exceeded, saving to database. (Using Bulk create)")
+
             WorkDeskStatus.objects.bulk_create(
                 [
                     WorkDeskStatus(
-                        workdesk_id=data["workdesk"],
+                        workdesk=self.all_desk_instances_map.get(data["workdesk"]),
                         status=DeskStatusEnum(data["status_enum"]).name,
                         created_at=data["timestamp"],
                         updated_at=timezone.localtime(timezone.now()),
@@ -27,7 +34,10 @@ class StatusBuffer:
                     for data in self.buffer
                 ]
             )
-            self.clear_buffer()
+
+            # Clear the buffer after saving to the database
+            self.buffer.clear()
+            self.frame_count = 0
 
         # avoid duplicate statues
         if self.buffer and self.buffer[-1]["status_enum"] == status_enum:
