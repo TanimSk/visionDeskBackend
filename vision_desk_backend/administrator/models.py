@@ -13,6 +13,7 @@ class User(AbstractUser):
 
 class WorkPlaceMetadata(models.Model):
     # Metadata for the workplace
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     workplace_image = models.ImageField(upload_to="images/")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -22,7 +23,7 @@ class WorkPlaceMetadata(models.Model):
 
 class WorkDesk(models.Model):
     # Model for the work desk
-    workplace = models.ForeignKey(WorkPlaceMetadata, on_delete=models.CASCADE)
+    workplace = models.ForeignKey(WorkPlaceMetadata, on_delete=models.CASCADE, related_name="workdesk")
     desk_number = models.CharField(max_length=100)
     x1_coordinate = models.IntegerField()
     y1_coordinate = models.IntegerField()

@@ -6,18 +6,19 @@ from rest_framework_simplejwt.views import TokenVerifyView
 from dj_rest_auth.views import (
     PasswordResetConfirmView,
     PasswordResetView,
-    PasswordChangeView,
+    # PasswordChangeView,
 )
 from django.conf.urls.static import static
 from django.conf import settings
 from django.views.generic import TemplateView
-from administrator.auth_view import LoginWthPermission
+from administrator.auth_view import LoginWthPermission, CustomLogout
 
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     # ---------- Auth ------------
     path("rest-auth/login/", LoginWthPermission.as_view(), name="login_view"),
+    path("rest-auth/logout/", CustomLogout.as_view(), name="logout_view"),
     # Password Change
     # path(
     #     "rest-auth/password/change/",

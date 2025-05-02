@@ -3,28 +3,31 @@ import redis
 import time
 import django
 import os
-from administrator.buffer import StatusBuffer
 
-
-status_buffer = StatusBuffer()
 # Setup Django
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "your_project.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "vision_desk_backend.settings")
 django.setup()
 
+from administrator.buffer import StatusBuffer
+status_buffer = StatusBuffer()
 
-def process_frame(self, frame):
+# Connect to Redis
+r = redis.Redis(host="localhost", port=6379, db=5)
+
+cap = cv2.VideoCapture("http://127.0.0.1:8001/video")
+
+
+import random
+def process_frame(frame):
+    
     # Dummy ML processing (convert to grayscale as an example)
     return {
         "frame": cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY),
+        # "frame": frame,
         "desk_no": 1,
-        "status_enum": 1,  # Replace with actual status enum
+        # "status_enum": random.choice([0, 1, 2]),  # Random status for demonstration
+        "status_enum": 1
     }
-
-
-# Connect to Redis
-r = redis.Redis(host="localhost", port=6379, db=0)
-
-cap = cv2.VideoCapture("your_cctv_rtsp_or_ip_stream")
 
 
 while True:
@@ -45,4 +48,4 @@ while True:
     _, jpeg = cv2.imencode(".jpg", detection_dict["frame"])
     r.set("latest_frame", jpeg.tobytes())
 
-    time.sleep(0.1)  # Add slight delay to control FPS
+    # time.sleep(0.1)  # Add slight delay to control FPS

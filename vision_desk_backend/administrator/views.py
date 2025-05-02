@@ -27,7 +27,7 @@ class SetupWorkPlaceView(APIView):
     def post(self, request, *args, **kwargs):
         if request.GET.get("action") == "add-image":
             serializer = self.serializer_class(data=request.data)
-            if serializer.is_valid():
+            if serializer.is_valid(raise_exception=True):
                 # if the workplace metadata already exists, update it
                 workplace_metadata = WorkPlaceMetadata.objects.first()
                 if workplace_metadata:
@@ -40,7 +40,7 @@ class SetupWorkPlaceView(APIView):
                         status=status.HTTP_201_CREATED,
                     )
                 else:
-                    serializer.save()
+                    serializer.save(user=request.user)
 
                     return JsonResponse(
                         {
@@ -49,15 +49,17 @@ class SetupWorkPlaceView(APIView):
                         },
                         status=status.HTTP_201_CREATED,
                     )
-            else:
-                return JsonResponse(
-                    {"success": False, "message": serializer.errors},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+
         elif request.GET.get("action") == "add-desks":
             serializer = WorkDeskSerializer(data=request.data, many=True)
-            if serializer.is_valid():
-                serializer.save()
+            if serializer.is_valid(raise_exception=True):                
+                workplace_metadata = WorkPlaceMetadata.objects.first()
+                # delete all existing work desks before adding new ones
+                if workplace_metadata:
+                    # delete all existing work desks
+                    workplace_metadata.workdesk.all().delete()
+
+                serializer.save(workplace=workplace_metadata)
                 return JsonResponse(
                     {
                         "success": True,
@@ -65,11 +67,7 @@ class SetupWorkPlaceView(APIView):
                     },
                     status=status.HTTP_201_CREATED,
                 )
-            else:
-                return JsonResponse(
-                    {"success": False, "message": serializer.errors},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+
         elif request.GET.get("action") == "set-time":
             if request.data.get("workplace_start_time") and request.data.get(
                 "workplace_end_time"
@@ -106,3 +104,12 @@ class SetupWorkPlaceView(APIView):
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+
+        else:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "message": "Invalid action.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )

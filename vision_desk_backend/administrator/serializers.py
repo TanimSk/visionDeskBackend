@@ -26,11 +26,11 @@ class WorkPlaceMetadataSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkPlaceMetadata
         fields = "__all__"
-        read_only_fields = ["created_at", "updated_at"]
+        read_only_fields = ["created_at", "updated_at", "user"]
 
 
 class WorkDeskSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkDesk
         fields = "__all__"
-        read_only_fields = ["created_at", "updated_at"]
+        read_only_fields = ["created_at", "updated_at", "workplace"]

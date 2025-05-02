@@ -8,13 +8,13 @@ from django.http import StreamingHttpResponse
 import redis
 
 
-r = redis.Redis(host="localhost", port=6379, db=0)
+r = redis.Redis(host="localhost", port=6379, db=5)
 
 
 class StreamHandlerView(APIView):
     permission_classes = [BasePermission]
 
-    def stream_latest_frame():
+    def stream_latest_frame(self):
         while True:
             frame = r.get("latest_frame")
             if frame:
@@ -23,7 +23,13 @@ class StreamHandlerView(APIView):
                 )
 
     def get(self, request, *args, **kwargs):
-        return StreamingHttpResponse(
-            self.stream_latest_frame(),
-            content_type="multipart/x-mixed-replace; boundary=frame",
-        )
+        if request.GET.get("action") == "stream":
+            return StreamingHttpResponse(
+                self.stream_latest_frame(),
+                content_type="multipart/x-mixed-replace; boundary=frame",
+            )
+        if request.GET.get("action") == "analytics":
+            # Perform analysis logic here
+            # For example, you can return a JSON response with analysis results
+            analysis_result = {"result": "Analysis result goes here"}
+            return JsonResponse(analysis_result, status=status.HTTP_200_OK)
