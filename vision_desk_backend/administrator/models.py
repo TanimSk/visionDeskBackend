@@ -37,9 +37,9 @@ class WorkDesk(models.Model):
 
 
 class DeskStatusEnum(Enum):
-    EMPTY = 0
-    IDLE = 1
-    WORKING = 2
+    EMPTY = 0    
+    WORKING = 1
+    IDLE = 2
 
     @classmethod
     def choices(cls):

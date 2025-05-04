@@ -7,13 +7,76 @@ from rest_framework.pagination import PageNumberPagination
 from django.http import StreamingHttpResponse
 from django.utils import timezone
 import redis
-
+import json
+from utils.buffer import StatusBuffer
 
 # models
 from administrator.models import WorkDeskStatus, WorkPlaceMetadata, DeskStatusEnum
 
 
 r = redis.Redis(host="localhost", port=6379, db=5)
+status_buffer = StatusBuffer()
+
+
+class UpdateBoudingBoxesView(APIView):
+    """
+    Example:
+    {
+        "n_person": 4,
+        "n_tables": 5,
+        "person_in_the_table": 1,
+        "person_idle": 2,
+        "person_away": 2,
+        "person_bound_boxes": {
+            "0": [120, 180, 200, 260],
+        },
+        "person_status": {
+            "0": 1,
+            "1": 0,
+            "2": 1,
+            "3": 0
+        },
+        "desk_person_map": {
+            "0": 1,
+            "1": 3,
+            "2": -1,
+            "3": -1,
+            "4": 0
+        }
+    }
+    """
+
+    def post(self, request, *args, **kwargs):
+        # Store the bounding boxes in Redis
+        r.set("latest_bounding_boxes", json.dumps(request.data))
+
+        print("latest_bounding_boxes", request.data)
+
+        desk_status_map = []
+
+        # map the desk number with the status
+        for desk_no, person in request.data["desk_person_map"].items():
+            print(desk_no, person)
+            if person == -1:  # no person in the desk
+                continue
+            desk_status_map.append(
+                {
+                    "desk_no": desk_no,
+                    "status_enum": request.data["person_status"][str(person)],
+                }
+            )
+
+        # add the status to the buffer
+        for desk_status in desk_status_map:
+            status_buffer.add_status(
+                desk_no=desk_status["desk_no"],
+                status_enum=desk_status["status_enum"],
+            )
+
+        return Response(
+            {"message": "Bounding boxes updated successfully."},
+            status=status.HTTP_200_OK,
+        )
 
 
 class StreamHandlerView(APIView):

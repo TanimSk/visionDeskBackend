@@ -20,6 +20,26 @@ class StandardResultsSetPagination(PageNumberPagination):
     page_query_param = "p"
 
 
+class ProfileView(APIView):
+    permission_classes = [BasePermission]
+    serializer_class = WorkPlaceMetadataSerializer
+    pagination_class = StandardResultsSetPagination
+
+    def get(self, request, *args, **kwargs):
+        workplace_metadata = WorkPlaceMetadata.objects.first()
+        if workplace_metadata:
+            serializer = self.serializer_class(workplace_metadata)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "message": "Workplace metadata not found.",
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+
 class SetupWorkPlaceView(APIView):
     permission_classes = [BasePermission]
     serializer_class = WorkPlaceMetadataSerializer
@@ -52,7 +72,7 @@ class SetupWorkPlaceView(APIView):
 
         elif request.GET.get("action") == "add-desks":
             serializer = WorkDeskSerializer(data=request.data, many=True)
-            if serializer.is_valid(raise_exception=True):                
+            if serializer.is_valid(raise_exception=True):
                 workplace_metadata = WorkPlaceMetadata.objects.first()
                 # delete all existing work desks before adding new ones
                 if workplace_metadata:

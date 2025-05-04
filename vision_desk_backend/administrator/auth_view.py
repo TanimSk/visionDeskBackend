@@ -48,8 +48,10 @@ class LoginWthPermission(APIView):
                 "last_name": user.last_name,
             },
             "role": "ADMIN" if user.is_admin else "UNKNOWN",
+            "workplace_setup": WorkPlaceMetadata.objects.exists(),
         }
 
+        # Development only: don't use samesite=None or secure=True
         # Set access and refresh token to the cookie
         response = Response(response_data, status=status.HTTP_200_OK)
         response.set_cookie(

@@ -29,9 +29,19 @@ SECRET_KEY = "django-insecure-5^bp@8n5vy5egn4o+d&^!u&#304e5(+s(u=39jo0h(&@_2!!&u
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
-CSRF_TRUSTED_ORIGINS = ["http://localhost:8000", "http://192.168.1.112:8000"]
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8000",
+    "http://192.168.1.112:8000",
+    "http://localhost:3000",
+]
 # CORS Settings
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Replace with your frontend's local URL (React, Vue, etc.)
+    "http://127.0.0.1:3000",  # Some setups use 127.0.0.1 instead of localhost
+    "http://192.168.1.107:3000",
+]
+CORS_ALLOW_CREDENTIALS = True  # Allow sending cookies in requests
+
 # Update this in production
 X_FRAME_OPTIONS = "ALLOWALL"
 
@@ -66,6 +76,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -229,8 +240,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = "static/"
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
