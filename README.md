@@ -28,7 +28,9 @@ python manage.py runserver 0.0.0.0:<port>
 python worker.py
 ```
 
-# You must have redis server running in the background!
+# NB: You must have redis server running in the background!
 URL: https://redis.io/docs/latest/operate/oss_and_stack/install/archive/install-redis/install-redis-on-mac-os/
+
+### Change stream the URL in `worker.py`, here `cap = cv2.VideoCapture("rtsp://192.168.1.112:8554/mystream")` 
 
 ### You are good to go!
