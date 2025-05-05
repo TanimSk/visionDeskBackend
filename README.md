@@ -28,4 +28,7 @@ python manage.py runserver 0.0.0.0:<port>
 python worker.py
 ```
 
+# You must have redis server running in the background!
+URL: https://redis.io/docs/latest/operate/oss_and_stack/install/archive/install-redis/install-redis-on-mac-os/
+
 ### You are good to go!
