@@ -207,6 +207,14 @@ class ReportAPIView(APIView):
                 content_type="image/jpeg",
             )
 
+        return JsonResponse(
+            {
+                "success": False,
+                "message": "Invalid action.",
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     def post(self, request, *args, **kwargs):
         # check if the user is authenticated
         if not request.user.is_authenticated:
@@ -306,3 +314,11 @@ class ReportAPIView(APIView):
                 },
                 status=status.HTTP_200_OK,
             )
+
+        return JsonResponse(
+            {
+                "success": False,
+                "message": "Invalid action.",
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )

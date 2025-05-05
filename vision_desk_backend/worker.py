@@ -11,8 +11,11 @@ django.setup()
 
 # Connect to Redis
 r = redis.Redis(host="localhost", port=6379, db=5)
+cap = cv2.VideoCapture("rtsp://192.168.1.112:8554/mystream")
 # cap = cv2.VideoCapture("rtsp://192.168.1.110:8554/mystream")
-cap = cv2.VideoCapture("rtsp://0.0.0.0:8554/mystream")
+# cap = cv2.VideoCapture("rtsp://0.0.0.0:8554/mystream")
+# cap = cv2.VideoCapture("rtsp://192.168.43.198:8554/mystream")
+# cap = cv2.VideoCapture("rtsp://192.168.48.46:8554/mystream")
 # cap = cv2.VideoCapture("rtsp://admin:HomeCamera2025@192.168.0.200:554/Streaming/Channels/101/?transportmode=unicast&streamtype=main")
 # cap = cv2.VideoCapture("http://192.168.1.112:8001/video")
 RED_ORANGE_GREEN = [

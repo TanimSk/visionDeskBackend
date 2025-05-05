@@ -37,6 +37,7 @@ CSRF_TRUSTED_ORIGINS = [
 # CORS Settings
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Replace with your frontend's local URL (React, Vue, etc.)
+    "http://localhost:3001",  # Replace with your frontend's local URL (React, Vue, etc.)
     "http://127.0.0.1:3000",  # Some setups use 127.0.0.1 instead of localhost
     "http://192.168.1.107:3000",
 ]
