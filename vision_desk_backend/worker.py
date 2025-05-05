@@ -11,7 +11,8 @@ django.setup()
 
 # Connect to Redis
 r = redis.Redis(host="localhost", port=6379, db=5)
-cap = cv2.VideoCapture("rtsp://192.168.1.110:8554/mystream")
+# cap = cv2.VideoCapture("rtsp://192.168.1.110:8554/mystream")
+cap = cv2.VideoCapture("rtsp://0.0.0.0:8554/mystream")
 # cap = cv2.VideoCapture("rtsp://admin:HomeCamera2025@192.168.0.200:554/Streaming/Channels/101/?transportmode=unicast&streamtype=main")
 # cap = cv2.VideoCapture("http://192.168.1.112:8001/video")
 RED_ORANGE_GREEN = [
@@ -56,7 +57,7 @@ def annotate_frame(frame):
     # Write texts on the frame
     cv2.putText(
         frame,
-        f"Total Person: {bounding_boxes["n_person"]}",
+        f"Total Person: {bounding_boxes['n_person']}",
         (10, 15),
         cv2.FONT_HERSHEY_SIMPLEX,
         0.35,
@@ -65,7 +66,7 @@ def annotate_frame(frame):
     )
     cv2.putText(
         frame,
-        f"Total Table: {bounding_boxes["n_tables"]}",
+        f"Total Table: {bounding_boxes['n_tables']}",
         (10, 35),
         cv2.FONT_HERSHEY_SIMPLEX,
         0.35,
@@ -74,7 +75,7 @@ def annotate_frame(frame):
     )
     cv2.putText(
         frame,
-        f"Working: {bounding_boxes["person_in_the_table"]}",
+        f"Working: {bounding_boxes['person_in_the_table']}",
         (10, 55),
         cv2.FONT_HERSHEY_SIMPLEX,
         0.35,
@@ -83,7 +84,7 @@ def annotate_frame(frame):
     )
     cv2.putText(
         frame,
-        f"Idle: {bounding_boxes["person_idle"]}",
+        f"Idle: {bounding_boxes['person_idle']}",
         (10, 75),
         cv2.FONT_HERSHEY_SIMPLEX,
         0.35,
@@ -92,7 +93,7 @@ def annotate_frame(frame):
     )
     cv2.putText(
         frame,
-        f"Away from table: {bounding_boxes["person_away"]}",
+        f"Away from table: {bounding_boxes['person_away']}",
         (10, 95),
         cv2.FONT_HERSHEY_SIMPLEX,
         0.35,

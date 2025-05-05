@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from enum import Enum
+from uuid import uuid4
 
 
 class User(AbstractUser):
@@ -19,6 +20,7 @@ class WorkPlaceMetadata(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     workplace_start_time = models.TimeField(blank=True, null=True)
     workplace_end_time = models.TimeField(blank=True, null=True)
+    source = models.CharField(max_length=100, blank=True, null=True)
 
 
 class WorkDesk(models.Model):
@@ -47,6 +49,7 @@ class DeskStatusEnum(Enum):
 
 
 class WorkDeskStatus(models.Model):
+    unique_id = models.UUIDField(db_index=True, default=uuid4)
     # Model for the work desk status
     workdesk = models.ForeignKey(WorkDesk, on_delete=models.CASCADE, related_name="workdesk")
     status = models.CharField(

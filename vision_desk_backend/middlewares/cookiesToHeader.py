@@ -6,6 +6,7 @@ class CookiesToRequestHeader:
     def __call__(self, request):
         # Get the access token from the cookies
         access_token = request.COOKIES.get('access_token')
+        print(f"Access token from cookies: {access_token}")
 
         # If the token is found, set it in the request headers
         if access_token:

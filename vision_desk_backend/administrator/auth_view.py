@@ -58,7 +58,7 @@ class LoginWthPermission(APIView):
             key="access_token",
             value=access_token,
             httponly=True,
-            secure=True,
+            secure=False,
             samesite="None",
             max_age=60 * 60 * 24 * 7,  # 1 week
         )
@@ -66,7 +66,7 @@ class LoginWthPermission(APIView):
             key="refresh_token",
             value=str(refresh),
             httponly=True,
-            secure=True,
+            secure=False,
             samesite="None",
             max_age=60 * 60 * 24 * 30,  # 1-month expiration
         )

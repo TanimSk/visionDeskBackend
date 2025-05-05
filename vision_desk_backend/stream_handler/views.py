@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from django.http import JsonResponse
 from rest_framework.views import APIView
-from rest_framework.permissions import BasePermission
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from django.http import StreamingHttpResponse
@@ -11,8 +11,15 @@ import json
 from utils.buffer import StatusBuffer
 
 # models
-from administrator.models import WorkDeskStatus, WorkPlaceMetadata, DeskStatusEnum
+from administrator.models import (
+    WorkDeskStatus,
+    WorkPlaceMetadata,
+    DeskStatusEnum,
+    WorkDesk,
+)
 
+# serializers
+from administrator.serializers import WorkDeskSerializer
 
 r = redis.Redis(host="localhost", port=6379, db=5)
 status_buffer = StatusBuffer()
@@ -80,8 +87,6 @@ class UpdateBoudingBoxesView(APIView):
 
 
 class StreamHandlerView(APIView):
-    permission_classes = [BasePermission]
-
     def stream_latest_frame(self):
         while True:
             frame = r.get("latest_frame")
@@ -97,22 +102,62 @@ class StreamHandlerView(APIView):
                 content_type="multipart/x-mixed-replace; boundary=frame",
             )
 
-        if request.GET.get("action") == "desk-analytics" and request.GET.get("desk-no"):
-            graph_data = {
-                "labels": [],
-                "status": [],
-            }
-            desk_status = WorkDeskStatus.objects.filter(
-                workdesk__desk_number=request.GET.get("desk-no"),
-                created_at__date=timezone.localtime().date(),
-            ).order_by("-created_at")
-
-            for desk_status in desk_status:
-                graph_data["labels"].append(desk_status.created_at.strftime("%H:%M"))
-                graph_data["status"].append(DeskStatusEnum(desk_status.status).value)
-
+        # check if the user is authenticated
+        if not request.user.is_authenticated:
             return JsonResponse(
-                graph_data,
+                {
+                    "success": False,
+                    "message": "User is not authenticated.",
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        if request.GET.get("action") == "desk-analytics":
+            if request.GET.get("desk-no"):
+                all_desk_no = list(
+                    WorkDesk.objects.all()
+                    .order_by("desk_number")
+                    .values_list("desk_number", flat=True)
+                )
+
+                graph_data = {
+                    "total": len(all_desk_no),
+                    "next_desk": all_desk_no[
+                        (all_desk_no.index(request.GET.get("desk-no")) + 1)
+                        % len(all_desk_no)
+                    ],
+                    "prev_desk": all_desk_no[
+                        (all_desk_no.index(request.GET.get("desk-no")) - 1)
+                        % len(all_desk_no)
+                    ],
+                    "desk_info": {},
+                    "labels": [],
+                    "status": [],
+                }
+                desk_status = WorkDeskStatus.objects.filter(
+                    workdesk__desk_number=request.GET.get("desk-no"),
+                    created_at__date=timezone.localtime().date(),
+                ).order_by("-created_at")
+
+                # desk info
+                graph_data["desk_info"] = WorkDeskSerializer(
+                    WorkDesk.objects.get(desk_number=request.GET.get("desk-no"))
+                ).data
+
+                for desk_status in desk_status:
+                    graph_data["labels"].append(
+                        desk_status.created_at.strftime("%h:%M %p")
+                    )
+                    graph_data["status"].append(desk_status.status)
+
+                return JsonResponse(
+                    graph_data,
+                    status=status.HTTP_200_OK,
+                )
+
+            desks = WorkDesk.objects.all()
+            return Response(
+                WorkDeskSerializer(desks, many=True).data,
                 status=status.HTTP_200_OK,
             )
 
@@ -145,9 +190,9 @@ class StreamHandlerView(APIView):
                 timeline.append(
                     {
                         "time": f"{time_only.strftime("%H:%M")}",
-                        "idle": f"{((work_status_filtered.filter(status='IDLE').count() / total_count) *100) if total_count != 0 else 0}%",
-                        "working": f"{((work_status_filtered.filter(status='WORKING').count() / total_count) *100)  if total_count != 0 else 0}%",
-                        "empty": f"{((work_status_filtered.filter(status='EMPTY').count() / total_count) *100)if total_count != 0 else 0}%",
+                        "idle": f"{(((work_status_filtered.filter(status='IDLE').count() / total_count) *100) if total_count != 0 else 0):.2f}%",
+                        "working": f"{(((work_status_filtered.filter(status='WORKING').count() / total_count) *100)  if total_count != 0 else 0):.2f}%",
+                        "empty": f"{(((work_status_filtered.filter(status='EMPTY').count() / total_count) *100)if total_count != 0 else 0):.2f}%",
                     }
                 )
 
